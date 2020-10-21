@@ -1,0 +1,14 @@
+* Konbu
+
+This is a Kotlin/JVM based ontology build system.
+
+It is at a really preliminary stage, the objective is to have a fully controllable and performant
+build system for ontologies that does not require tweaking obscure configuration files, Makefiles…
+
+This should also make updating the build system much more independent from the description of the build
+itself and provide better ways to test and parallelize actions (promises promises).
+
+It is using [[https://robot.obolibrary.org][Robot]] for many of its tasks.
+
+
+It is released under a [[LICENSE.txt][BSD-3 clause license]].
