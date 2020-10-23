@@ -18,6 +18,11 @@ class BuildScriptRecipe {
     var root: String = "data"
 
     /**
+     * ontology name
+     */
+    var name: String = ""
+
+    /**
      * main source file for the ontology (relative to root)
      */
     var mainSource: String = ""
@@ -75,6 +80,8 @@ class BuildScriptRecipe {
         require(mainSource != "") { "mainSource must be set." }
         require(uribase != "") { "uribase must be set." }
         require(version != "") { "version must be set." }
+        require(name != "") { "name must be set." }
+
         require(File(root).exists()) { "Root directory $root must exist." }
         return BuildScript(
             imports = imports.toSet(),
