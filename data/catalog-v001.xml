@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho.owl" uri="data/main-edit.owl"/>
+    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/bfo_import.owl" uri="imports/bfo_import.owl"/>
+    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/ro_import.owl" uri="imports/ro_import.owl"/>
+    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/eco_import.owl" uri="imports/eco_import.owl"/>
+    <group id="Folder Repository, directory=, recursive=false, Auto-Update=false, version=2" prefer="public" xml:base=""/>
+</catalog>

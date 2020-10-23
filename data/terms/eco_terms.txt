@@ -1,0 +1,10 @@
+ECO:0000000 # evidence
+ECO:0000001
+ECO:0000002
+eco:0000006 # experimental evidence
+ECO:0001096 # mass spectrometry evidence
+ECO:0001105 # nuclear magnetic resonance spectroscopy evidence
+ECO:0000100 # fractionation evidence
+ECO:0000178 # in vivo assay evidence
+ECO:0000181 # in vitro assay evidence
+ECO:0006152 # medical practitioner statement evidence
