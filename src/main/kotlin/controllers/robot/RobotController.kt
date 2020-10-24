@@ -1,14 +1,10 @@
-package controllers
+package controllers.robot
 
 import FilePath
-import RobotOutputFile
 import SparqlFile
-import argArray
 import builder.BuildParameters
 import org.obolibrary.robot.*
-import org.semanticweb.owlapi.model.IRI
 import java.io.File
-import java.net.URI
 
 /**
  * Handle Robot commands in a single place.
@@ -28,7 +24,7 @@ class RobotController(private val buildParameters: BuildParameters) {
  * @param root: the root directory
  * @param state: give an initial state coming from a Robot command
  */
-class RobotHandler(val root: FilePath, catalog: String?, private var state: CommandState? = CommandState()) {
+class RobotHandler(private val root: FilePath, catalog: String?, private var state: CommandState? = CommandState()) {
     private val catalogArray: Array<String> =
         catalog?.let { arrayOf("--catalog", File(root, it).path) }
             ?: arrayOf()

@@ -9,8 +9,6 @@ import java.io.File
  * Generate a BuildScript using a DSL
  */
 class BuildScriptRecipe {
-    private val logger = KotlinLogging.logger {}
-
     /**
      * root directory for the ontology files (source and build for now)
      */
@@ -97,6 +95,10 @@ class BuildScriptRecipe {
         )
     }
     // TODO: Triggers
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
+    }
 }
 
 /**

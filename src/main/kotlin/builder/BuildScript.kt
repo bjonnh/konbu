@@ -3,7 +3,7 @@ package builder
 import builder.handlers.Import
 import builder.handlers.ImporterHandler
 import builder.handlers.PreseedHandler
-import controllers.RobotController
+import controllers.robot.RobotController
 import mu.KotlinLogging
 import timeBlock
 import java.io.File
@@ -19,7 +19,6 @@ class BuildScript(
     private val imports: Set<Import>,
     buildParameters: BuildParameters
 ) {
-    private val logger = KotlinLogging.logger {}
     private val robotController: RobotController = RobotController(buildParameters)
     private val importerHandler: ImporterHandler = ImporterHandler(buildParameters, robotController)
     private val preseedHandler: PreseedHandler = PreseedHandler(buildParameters, robotController)
@@ -45,5 +44,9 @@ class BuildScript(
                 importerHandler.import(it, preseedFile = preseedFile)
             }
         }
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
     }
 }

@@ -3,8 +3,8 @@ package builder.handlers
 import builder.BuildParameters
 import cache.FileCacheManager
 import changedetectors.TimestampChangeDetector
-import controllers.RobotController
-import controllers.action
+import controllers.action.action
+import controllers.robot.RobotController
 import isAlnum
 import mu.KotlinLogging
 import timeBlock
@@ -37,7 +37,6 @@ data class Import(
  * @param robotController: Controller for ROBOT
  */
 class ImporterHandler(private val buildParameters: BuildParameters, private val robotController: RobotController) {
-    private val logger = KotlinLogging.logger {}
     private val root = buildParameters.root
     private val cacheManager = FileCacheManager(File(root, "cache"))
 
@@ -114,5 +113,9 @@ class ImporterHandler(private val buildParameters: BuildParameters, private val 
                 cacheManager.getEntry(fileName) // We make sure that it exists
             }
         }
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
     }
 }

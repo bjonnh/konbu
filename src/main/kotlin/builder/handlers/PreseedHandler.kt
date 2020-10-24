@@ -2,8 +2,8 @@ package builder.handlers
 
 import builder.BuildParameters
 import changedetectors.TimestampChangeDetector
-import controllers.RobotController
-import controllers.action
+import controllers.action.action
+import controllers.robot.RobotController
 import mu.KotlinLogging
 import timeBlock
 import java.io.File
@@ -15,7 +15,6 @@ import java.io.File
  * @param robotController: The ROBOT controller
  */
 class PreseedHandler(private val buildParameters: BuildParameters, private val robotController: RobotController) {
-    private val logger = KotlinLogging.logger {}
     private val root = buildParameters.root
 
     /**
@@ -57,5 +56,9 @@ class PreseedHandler(private val buildParameters: BuildParameters, private val r
         }
 
         return preseedFile
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
     }
 }
