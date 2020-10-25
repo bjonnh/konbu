@@ -1,9 +1,18 @@
 import builder.buildScript
 
-// TODO: Robot controller
+// TODO: Checksum Manager
 // TODO: location of tmp files
 // TODO: force rebuild (maybe a global change manager?)
 // TODO: add templating
+// TODO: add self-tracking (if the rule change, it needs to rebuild)
+//       it may be done using a counter that is incremented in each module of the code, but that's complicated
+//       maybe we can somehow keep a signature of a class?
+//       for the recipe it is easy, we just take the hash from the generating data class
+// TODO: dynamic dependencies (when tasks create new elements that would influence other tasks)
+// TODO: early cut-off if a source change (comment added) but not the destination
+// TODO: keep the build graph from run to run
+// TODO: consider separate compilation ala bazel
+//      «When Bazel performs separate compilation, it creates a new directory and fills it with symlinks to the explicit input dependencies for the rule.»
 // TODO:
 
 fun main() {
