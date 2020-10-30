@@ -10,13 +10,18 @@ package builder
  * @param mainSource: main source file (relative to root)
  * @param extraSources: extra source files (relative to root)
  * @param preseedGeneration: does a preseed has to be generated
+ * @param targets: the targets that will have to be built
  */
+
 data class BuildParameters(
     val root: String,
+    val name: String,
     val uribase: String,
     val version: String,
     val catalog: String?,
     val mainSource: String,
     val extraSources: List<String>,
-    val preseedGeneration: Boolean
+    val preseedGeneration: Boolean,
+    val targets: List<Target>,
+    val formats: List<String>
 )

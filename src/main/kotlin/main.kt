@@ -31,6 +31,8 @@ fun main() {
 
         preseedGeneration = true
 
+        formats = listOf("obo", "json")
+
         importAndExtract(
             name = "bfo",
             location = "http://purl.obolibrary.org/obo/bfo.owl",
@@ -51,6 +53,9 @@ fun main() {
             terms = "eco_terms.txt",
             forceUpdate = forceUpdate
         )
+
+        build_full(name = "full", reasoning = true)
+        build_base(name = "base", reasoning = false)
     }.execute()
 }
 
@@ -63,17 +68,18 @@ fun main() {
    NA odkversion: Displays the ODK version and robot version
     X all_imports
       all_main: $MAIN_FILES
-        $MAIN_FILES: $MAIN_PRODUCTS *(x.y) $MAIN_FORMATS (eg main_product_1.format_1 …) + $MAIN_GZIP
+        $MAIN_FILES: $MAIN_PRODUCTS *(x.y) $MAIN_FORMATS (eg main_product_1.format_1 …)
         $MAIN_PRODUCTS: $ONTNAME *(x-y) $RELEASE_ARTIFACTS (eg pho-full, pho-base) + $ONT
 
         $ONT-full.obo: $ONT-full.owl
+            - $(ROBOT) convert --input $< --check false -f obo $(OBO_FORMAT_OPTIONS) -o $@.tmp.obo && grep -v ^owl-axioms $@.tmp.obo > $@ && rm $@.tmp.obo
+        $ONT-base.obo: $ONT-base.owl
             - $(ROBOT) convert --input $< --check false -f obo $(OBO_FORMAT_OPTIONS) -o $@.tmp.obo && grep -v ^owl-axioms $@.tmp.obo > $@ && rm $@.tmp.obo
             $OBO_FORMAT_OPTIONS =           ""
         $ONT-full.json: $ONT-full.owl
             - $(ROBOT) annotate --input $< --ontology-iri $(ONTBASE)/$@ $(ANNOTATE_ONTOLOGY_VERSION) convert --check false -f json -o $@.tmp.json && mv $@.tmp.json $@
             $ONTBASE = $uribase/$ont
-        $ONT-base.obo: $ONT-base.owl
-            - $(ROBOT) convert --input $< --check false -f obo $(OBO_FORMAT_OPTIONS) -o $@.tmp.obo && grep -v ^owl-axioms $@.tmp.obo > $@ && rm $@.tmp.obo
+
         $ONT-base.json: $ONT-base.owl
             - $(ROBOT) annotate --input $< --ontology-iri $(ONTBASE)/$@ $(ANNOTATE_ONTOLOGY_VERSION) convert --check false -f json -o $@.tmp.json && mv $@.tmp.json $@
         $ONT.owl: $ONT-full.owl

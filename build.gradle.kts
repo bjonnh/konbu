@@ -13,10 +13,10 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
-    implementation("org.obolibrary.robot:robot-core:1.7.0") {
+    implementation("org.obolibrary.robot:robot-core:1.7.1") {
         exclude ("org.slf4j")
     }
-    implementation("org.obolibrary.robot:robot-command:1.7.0") {
+    implementation("org.obolibrary.robot:robot-command:1.7.1") {
         exclude ("org.slf4j")
     }
 

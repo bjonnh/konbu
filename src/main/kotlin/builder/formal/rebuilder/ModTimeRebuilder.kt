@@ -1,27 +1,36 @@
 package builder.formal.rebuilder
 
 import builder.formal.*
-import kotlin.time.ExperimentalTime
-import kotlin.time.TimeMark
-import kotlin.time.TimeSource
+import builder.formal.information.ModTimeInformation
+import builder.formal.tasks.Task
 
-data class MakeInfo<K : Key> @ExperimentalTime constructor(
-    val startTime: TimeMark,
-    val timestamps: MutableMap<Key, TimeMark>
-) // We can't use variable types on typealias so we are going to use a dataclass…
+class ModTimeRebuilder<K : Key, V : Value>(private val makeInfo: ModTimeInformation<K>) : Rebuilder<K, V> {
+    private var now: Long = 1
 
-@ExperimentalTime
-class ModTimeRebuilder<C : Condition, IR : PersistentInformation, K : Key, V : Value> : Rebuilder<C, IR, K, V> {
-    val makeInfo = MakeInfo<K>(
-        TimeSource.Monotonic.markNow(), mutableMapOf()
-    )
+    private fun now(): Long = now++
 
-    override fun rebuild(k: K, v: V, task: Task<C, K, V>): Task<MonadState<IR>, K, V> {
-        val dirty: Boolean = when (makeInfo.timestamps[k]) {
-            null -> true
-            else -> task.input.any { // TODO: Finish that part can't use TimeMark as they are not comparable
-            val time =     makeInfo.timestamps[it].
-                  time == null || time!! > makeInfo.startTime
+    /**
+     * Returns a function that will check that timestamps are ok before running
+     */
+    override fun rebuild(task: Task<K, V>, v: V?, fetch: (Task<K, V>) -> V): () -> V {
+        return {
+            val timeOutput = makeInfo[task.output]
+
+            val dirty = if (v == null || timeOutput == null) {
+                true
+            } else {
+                // It is dirty if any of the inputs is older than current output time
+                task.input.any { key ->
+                    val time = makeInfo[key]
+                    time?.let { it > timeOutput } ?: true
+                }
+            }
+            if (dirty) {
+                makeInfo[task.output] = TimeValue(now())
+                fetch(task)
+            } else {
+                println(" Rebuilder for ${task.output} => task is not dirty, not rebuilding")
+                v ?: fetch(task)
             }
         }
     }

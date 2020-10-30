@@ -72,6 +72,28 @@ class RobotHandler(private val root: FilePath, catalog: String?, private var sta
     }
 
     /**
+     * Merge the given ontology files.
+     */
+    fun merge(
+        input: File,
+        extraInput: List<File>,
+        outFile: RobotOutputFile? = null
+    ): RobotHandler {
+        MergeCommand().execute(
+            state,
+            arrayOf(
+                *catalogArray,
+                "-i", input.path,
+                *extraInput.flatMap {
+                    listOf("-i", it.path)
+                }.toTypedArray(),
+                *outFile.argArray()
+            )
+        )
+        return this
+    }
+
+    /**
      * Extract terms from the input using the given method
      */
     fun extract(input: File, terms: File, method: String, outFile: RobotOutputFile? = null): RobotHandler {
@@ -98,6 +120,45 @@ class RobotHandler(private val root: FilePath, catalog: String?, private var sta
             arrayOf(
                 "--update", file.path,
                 *outFile.argArray()
+            )
+        )
+        return this
+    }
+
+    /**
+     * Reason (only ELK for now)
+     */
+    fun reason(): RobotHandler {
+        ReasonCommand().execute(
+            state,
+            arrayOf(
+                "--reasoner", "ELK",
+                "--equivalent-classes-allowed", "all",
+                "--exclude-tautologies", "structural"
+            )
+        )
+        return this
+    }
+
+    /**
+     * Relax
+     */
+    fun relax(): RobotHandler {
+        RelaxCommand().execute(
+            state,
+            arrayOf()
+        )
+        return this
+    }
+
+    /**
+     * Reduce (ELK only for now)
+     */
+    fun reduce(): RobotHandler {
+        ReduceCommand().execute(
+            state,
+            arrayOf(
+                "-r", "ELK"
             )
         )
         return this
@@ -145,6 +206,21 @@ class RobotHandler(private val root: FilePath, catalog: String?, private var sta
             arrayOf(
                 "-I", uri,
                 *outFile.argArray()
+            )
+        )
+        return this
+    }
+
+    /**
+     * Convert an ontology to format write to tempFile
+     */
+    fun convert(format: String, tempFile: RobotOutputFile): RobotHandler {
+        ConvertCommand().execute(
+            state,
+            arrayOf(
+                "-c", "false",
+                "-f", format,
+                "-o", tempFile.path
             )
         )
         return this

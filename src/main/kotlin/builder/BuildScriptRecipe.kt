@@ -58,6 +58,13 @@ class BuildScriptRecipe {
     var version: String = ""
 
     /**
+     * formats the ontology will be built to besides owl
+     */
+    var formats: List<String> = listOf()
+
+    private val targets: MutableList<Target> = mutableListOf()
+
+    /**
      * Add an external ontology
      */
     fun importAndExtract(name: String, location: String, terms: FilePath, forceUpdate: Boolean) {
@@ -84,16 +91,28 @@ class BuildScriptRecipe {
         return BuildScript(
             imports = imports.toSet(),
             buildParameters = BuildParameters(
-                root,
-                uribase,
-                version,
-                catalog,
-                mainSource,
-                extraSources,
-                preseedGeneration
+                root = root,
+                name = name,
+                uribase = uribase,
+                version = version,
+                catalog = catalog,
+                mainSource = mainSource,
+                extraSources = extraSources,
+                preseedGeneration = preseedGeneration,
+                targets = targets,
+                formats = formats
             )
         )
     }
+
+    fun build_full(name: String, reasoning: Boolean) {
+        targets.add(Target(name, reasoning, TargetType.FULL))
+    }
+
+    fun build_base(name: String, reasoning: Boolean) {
+        targets.add(Target(name, reasoning, TargetType.BASE))
+    }
+
     // TODO: Triggers
 
     companion object {
@@ -107,3 +126,14 @@ class BuildScriptRecipe {
 fun buildScript(f: BuildScriptRecipe.() -> Unit): BuildScript {
     return BuildScriptRecipe().apply(f).build()
 }
+
+enum class TargetType {
+    FULL,
+    BASE
+}
+
+data class Target(
+    val name: String,
+    val reasoning: Boolean,
+    val targetType: TargetType
+)
