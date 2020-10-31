@@ -6,6 +6,7 @@ plugins {
     application
     id("com.github.johnrengelman.shadow") version "6.1.0"
     kotlin("jvm") version "1.4.10"
+
 }
 
 val kotlinVersion = "1.4.10"
@@ -23,6 +24,7 @@ application {
 
 dependencies {
     api(kotlin("stdlib"))
+    implementation(kotlin("reflect"))
 
     api("org.obolibrary.robot:robot-core:1.7.1") {
         exclude("org.slf4j")
@@ -31,11 +33,8 @@ dependencies {
         exclude("org.slf4j")
     }
 
-    implementation(kotlin("script-runtime", kotlinVersion))
-    implementation(kotlin("script-util", kotlinVersion))
-    implementation(kotlin("compiler-embeddable", kotlinVersion))
-    implementation(kotlin("scripting-compiler-embeddable", kotlinVersion))
-    implementation("net.java.dev.jna:jna:5.6.0")
+    api("org.jetbrains.kotlin:kotlin-scripting-jvm:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host:$kotlinVersion")
 
     api("io.github.microutils:kotlin-logging:1.12.0")
     api("org.slf4j:slf4j-simple:1.7.29")
@@ -45,7 +44,14 @@ dependencies {
 tasks {
     named<ShadowJar>("shadowJar") {
         minimize {
-            exclude(dependency("org.jetbrains.kotlin:.*"))
+            //exclude(dependency("org.jetbrains.kotlin:.*"))
+            exclude(dependency("org.jetbrains.kotlin:kotlin-reflect"))
+            exclude(dependency("org.jetbrains.kotlin:kotlin-compiler-embeddable"))
+            exclude(dependency("org.apache.logging.log4j:.*"))
+            exclude(dependency("log4j:log4j:.*"))
+            exclude(dependency("com.fasterxml.jackson.core:.*"))
+            exclude(dependency("org.semanticweb.elk:.*"))
+            exclude(dependency("net.sourceforge.owlapi:.*"))
         }
         isZip64 = true
         archiveBaseName.set("konbu-shadow")

@@ -4,10 +4,12 @@ import FilePath
 import net.nprod.konbu.builder.handlers.Import
 import mu.KotlinLogging
 import java.io.File
+import kotlin.script.experimental.annotations.KotlinScript
 
 /**
  * Generate a BuildScript using a DSL
  */
+@KotlinScript(fileExtension = "konbu.kts")
 class BuildScriptRecipe {
     /**
      * root directory for the ontology files (source and build for now)

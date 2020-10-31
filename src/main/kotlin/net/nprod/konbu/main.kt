@@ -2,7 +2,14 @@ package net.nprod.konbu
 
 import net.nprod.konbu.builder.BuildScriptRecipe
 import java.io.File
-import javax.script.ScriptEngineManager
+import kotlin.script.experimental.annotations.KotlinScript
+import kotlin.script.experimental.api.*
+import kotlin.script.experimental.host.toScriptSource
+import kotlin.script.experimental.jvm.dependenciesFromCurrentContext
+import kotlin.script.experimental.jvm.jvm
+import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
+import kotlin.script.experimental.jvmhost.createJvmCompilationConfigurationFromTemplate
+import kotlin.script.experimental.jvmhost.createJvmEvaluationConfigurationFromTemplate
 
 // TODO: Checksum Manager
 // TODO: location of tmp files
@@ -17,27 +24,43 @@ import javax.script.ScriptEngineManager
 // TODO: keep the build graph from run to run
 // TODO: consider separate compilation ala bazel
 //      «When Bazel performs separate compilation, it creates a new directory and fills it with symlinks to the explicit input dependencies for the rule.»
-// TODO:
-
-// Taken and simplified from: https://github.com/s1monw1/KtsRunner
-
-inline fun <reified T> Any?.castOrError() = takeIf { it is T }?.let { it as T }
-    ?: throw IllegalArgumentException("Cannot cast $this to expected type ${T::class}")
-class LoadException(message: String? = null, cause: Throwable? = null) : RuntimeException(message, cause)
 
 
 fun main() {
     val file = File("konbu.kts")
     if (!file.exists()) throw RuntimeException("You need a konbu.kts file for this tool to work.")
+    val recipe = BuildScriptRecipe()
+    fun evalFile(scriptFile: SourceCode): ResultWithDiagnostics<EvaluationResult> {
+        val compilationConfiguration = ScriptCompilationConfiguration {
+            jvm {
+                dependenciesFromCurrentContext(
+                    wholeClasspath = true
+                )
+            }
+            implicitReceivers(BuildScriptRecipe::class)
+            defaultImports("net.nprod.konbu.builder.*")
+        }
 
-    val engine = ScriptEngineManager().getEngineByExtension("kts")
-    if (engine==null) throw RuntimeException("Problem when packaging the application, we cannot run scripts!")
-    val o: BuildScriptRecipe =
-        runCatching { engine.eval(file.reader()) }
-            .getOrElse { throw LoadException("Cannot load script", it) }
-            .castOrError()
-    o.build().execute()
+        val evaluationConfiguration = ScriptEvaluationConfiguration {
+            implicitReceivers(recipe)
+        }
+
+        return BasicJvmScriptingHost().eval(scriptFile, compilationConfiguration, evaluationConfiguration)
+    }
+
+    val res = evalFile(file.toScriptSource())
+    when (res) {
+        is ResultWithDiagnostics.Failure -> {
+            res.reports.forEach {
+                println("Error : ${it.message}" + if (it.exception == null) "" else ": ${it.exception}")
+            }
+        }
+        is ResultWithDiagnostics.Success -> {
+            recipe.build().execute()
+        }
+    }
 }
+
 
 /**
 all:
