@@ -1,15 +1,8 @@
 package net.nprod.konbu
 
 import net.nprod.konbu.builder.BuildScriptRecipe
+import runScript
 import java.io.File
-import kotlin.script.experimental.annotations.KotlinScript
-import kotlin.script.experimental.api.*
-import kotlin.script.experimental.host.toScriptSource
-import kotlin.script.experimental.jvm.dependenciesFromCurrentContext
-import kotlin.script.experimental.jvm.jvm
-import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
-import kotlin.script.experimental.jvmhost.createJvmCompilationConfigurationFromTemplate
-import kotlin.script.experimental.jvmhost.createJvmEvaluationConfigurationFromTemplate
 
 // TODO: Checksum Manager
 // TODO: location of tmp files
@@ -28,39 +21,12 @@ import kotlin.script.experimental.jvmhost.createJvmEvaluationConfigurationFromTe
 
 fun main() {
     val file = File("konbu.kts")
-    if (!file.exists()) throw RuntimeException("You need a konbu.kts file for this tool to work.")
+    if (!file.exists()) throw RuntimeException("You need a ${file.name} file for this tool to work.")
     val recipe = BuildScriptRecipe()
-    fun evalFile(scriptFile: SourceCode): ResultWithDiagnostics<EvaluationResult> {
-        val compilationConfiguration = ScriptCompilationConfiguration {
-            jvm {
-                dependenciesFromCurrentContext(
-                    wholeClasspath = true
-                )
-            }
-            implicitReceivers(BuildScriptRecipe::class)
-            defaultImports("net.nprod.konbu.builder.*")
-        }
-
-        val evaluationConfiguration = ScriptEvaluationConfiguration {
-            implicitReceivers(recipe)
-        }
-
-        return BasicJvmScriptingHost().eval(scriptFile, compilationConfiguration, evaluationConfiguration)
-    }
-
-    val res = evalFile(file.toScriptSource())
-    when (res) {
-        is ResultWithDiagnostics.Failure -> {
-            res.reports.forEach {
-                println("Error : ${it.message}" + if (it.exception == null) "" else ": ${it.exception}")
-            }
-        }
-        is ResultWithDiagnostics.Success -> {
-            recipe.build().execute()
-        }
+    runScript(file, receivers = arrayOf(recipe)) {
+        recipe.build().execute()
     }
 }
-
 
 /**
 all:
