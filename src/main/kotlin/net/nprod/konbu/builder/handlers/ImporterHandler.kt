@@ -43,6 +43,10 @@ class ImporterHandler(
 ) {
     private val root = buildParameters.root
 
+    init {
+        File(root, "imports").mkdir()
+    }
+
     /**
      * Import the given Import
      *
@@ -65,12 +69,13 @@ class ImporterHandler(
             val outFile = File(root, "imports/${import.name}_import.owl")
             val filteredTermsFile = createTempFile()
 
-            action(
+            val res = action(
                 inputs = listOf(file, termListFile, preseedFile),
                 outputs = listOf(outFile),
                 changeDetector = TimestampChangeDetector,
                 forceOn = forceUpdate
             ) {
+                logger.info("Preseed file is $preseedFile")
                 val deduplicatedTerms = termListFile.readLines() + preseedFile.readLines().mapNotNull {
                     if (it == "" || it.startsWith("#")) {
                         null
@@ -80,6 +85,7 @@ class ImporterHandler(
                 }.toSet()
 
                 logger.info("Extracting ${deduplicatedTerms.size} term(s)")
+
                 filteredTermsFile.writeText(deduplicatedTerms.joinToString("\n"))
 
                 val method = "BOT"
@@ -98,8 +104,10 @@ class ImporterHandler(
                     )
             }.onSkipped {
                 logger.info("Skipped the extraction as timestamps show no change")
+            }.onFailed {
+                throw RuntimeException("Received an error message: ${it.message}")
             }
-
+            logger.info("We went after: $res")
             filteredTermsFile.delete()
         }
     }

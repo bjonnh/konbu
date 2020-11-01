@@ -8,12 +8,15 @@ import net.nprod.konbu.controllers.action.Action
  */
 object TimestampChangeDetector : ChangeDetector {
     override fun didChange(action: Action): Boolean {
+        // If any of the output file doesn't exist, we need to rebuild
+        if (action.outputs.any { !it.exists() }) return true
         val lastModifiedOutput = action.outputs.mapNotNull {
             if (it.exists()) it.lastModified() else null
         }.maxOrNull() ?: return true
         val lastModifiedInput = (action.inputs.map {
             it.lastModified()
         }.maxOrNull() ?: 0)
+
         return lastModifiedInput > lastModifiedOutput
     }
 }

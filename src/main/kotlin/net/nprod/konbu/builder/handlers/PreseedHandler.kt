@@ -17,6 +17,10 @@ import java.io.File
 class PreseedHandler(private val buildParameters: BuildParameters, private val robotController: RobotController) {
     private val root = buildParameters.root
 
+    init {
+        File(root, "tmp").mkdir()
+    }
+
     /**
      * Process the given imports
      */
@@ -29,6 +33,8 @@ class PreseedHandler(private val buildParameters: BuildParameters, private val r
         logger.timeBlock("generating preseed") {
             if (imports.any { !File(root, "imports/${it.name}_import.owl").exists() }) {
                 logger.warn("Skipping preseed generation as all imports have not been processed")
+                // We create an empty file if it doesn't exist
+                if (!preseedFile.exists()) preseedFile.writeText("")
                 return@timeBlock
             }
 
