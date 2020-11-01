@@ -3,13 +3,32 @@ package net.nprod.konbu.builder.formal
 import net.nprod.konbu.builder.formal.schedulers.BuildTask
 import net.nprod.konbu.builder.formal.tasks.Task
 import net.nprod.konbu.builder.formal.tasks.Tasks
+import java.io.File
 
-interface Key
+interface Key {
+    fun exists(): Boolean = true
+}
+
 interface Value
 
 inline class StringKey(val value: String) : Key
-inline class StringValue(val value: String) : Value
 
+/**
+ * Keys representing files
+ */
+data class FileKey(val value: File) : Key {
+    constructor(value: String) : this(
+        File(value)
+    )
+
+    /**
+     * Get the last modified time as a TimeValue
+     */
+    fun lastModified() = TimeValue(value.lastModified())
+    override fun exists() = value.exists()
+}
+
+inline class StringValue(val value: String) : Value
 inline class TimeValue(val value: Long)
 inline class BooleanValue(val value: Boolean)
 
@@ -54,5 +73,5 @@ interface Scheduler<K : Key, V : Value, I : Information> {
         tasks: Tasks<K, V>,
         target: K,
         fetch: (Task<K, V>) -> V
-    ): BuildTask<V>
+    ): BuildTask<V>?
 }

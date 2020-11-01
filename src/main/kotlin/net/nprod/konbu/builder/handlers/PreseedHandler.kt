@@ -5,6 +5,8 @@ import net.nprod.konbu.changedetectors.TimestampChangeDetector
 import net.nprod.konbu.controllers.action.action
 import net.nprod.konbu.controllers.robot.RobotController
 import mu.KotlinLogging
+import net.nprod.konbu.builder.formal.tasks.NullValue
+import net.nprod.konbu.controllers.OntoTask
 import timeBlock
 import java.io.File
 
@@ -16,6 +18,7 @@ import java.io.File
  */
 class PreseedHandler(private val buildParameters: BuildParameters, private val robotController: RobotController) {
     private val root = buildParameters.root
+    val preseedFile = File(File(root, "tmp"), "pre_seed.txt")
 
     init {
         File(root, "tmp").mkdir()
@@ -62,6 +65,42 @@ class PreseedHandler(private val buildParameters: BuildParameters, private val r
         }
 
         return preseedFile
+    }
+
+    fun getTasks(imports: Set<Import>): List<OntoTask> {
+        // TODO: add force update
+        // TODO: add the onSkipped
+
+        val mainSource = File(root, buildParameters.mainSource)
+        val extraFiles = buildParameters.extraSources.map { File(root, it) }
+        val mergedFile = File(File(root, "tmp"), "merged-no-imports.owl")
+
+        if (imports.any { !File(root, "imports/${it.name}_import.owl").exists() }) {
+            logger.warn("Skipping preseed generation as all imports have not been processed")
+            // We create an empty file if it doesn't exist
+            if (!preseedFile.exists()) preseedFile.writeText("")
+            return listOf()
+        }
+
+        return listOf(
+            OntoTask(
+                "Generate merged file",
+                listOf(mainSource) + extraFiles,
+                mergedFile
+            ) {
+                robotController.handler().mergeAndRemoveImports(mainSource, extraFiles, mergedFile)
+                NullValue()
+            },
+            OntoTask(
+                "Generate preseed file",
+                listOf(mergedFile),
+                preseedFile
+            ) {
+                robotController.handler().extractTerms(mergedFile, preseedFile)
+                NullValue()
+            }
+
+        )
     }
 
     companion object {

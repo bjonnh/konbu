@@ -6,14 +6,18 @@ import net.nprod.konbu.builder.formal.graph.hasCycle
 import net.nprod.konbu.builder.formal.graph.reachable
 import net.nprod.konbu.builder.formal.information.BasicDirtyBitInformation
 import net.nprod.konbu.builder.formal.information.BasicModTimeInformation
+import net.nprod.konbu.builder.formal.information.FileModTimeInformation
 import net.nprod.konbu.builder.formal.rebuilder.DirtyBitRebuilder
+import net.nprod.konbu.builder.formal.rebuilder.FileModTimeRebuilder
 import net.nprod.konbu.builder.formal.rebuilder.ModTimeRebuilder
 import net.nprod.konbu.builder.formal.schedulers.RestartingScheduler
 import net.nprod.konbu.builder.formal.schedulers.TopologicalScheduler
 import net.nprod.konbu.builder.formal.stores.BasicStore
 import net.nprod.konbu.builder.formal.tasks.NamedTask
+import net.nprod.konbu.builder.formal.tasks.NullValue
 import net.nprod.konbu.builder.formal.tasks.Task
 import net.nprod.konbu.builder.formal.tasks.Tasks
+import java.io.File
 import kotlin.system.measureTimeMillis
 
 class BasicBuild<K : Key, V : Value, I : Information>(
@@ -35,12 +39,14 @@ class BasicBuild<K : Key, V : Value, I : Information>(
             fetch
         )
 
-        buildTask.f()
+        if (buildTask != null)
+            buildTask.f()
+
         return store // TODO: We may want to update store
     }
 }
 
-// TODO: How do we gite MakeInfo to ModTimeRebuilder?
+// TODO: How do we gite MakeInfo to net.nprod.konbu.builder.formal.rebuilder.ModTimeRebuilder?
 
 fun main() {
     val taskMakea =
@@ -89,6 +95,42 @@ fun main() {
 
     topological_modtime_build(tasks)
     restartingscheduler_dirtybit_build(tasks)
+    println("File Builder")
+    filebuilder(
+        Tasks(
+            setOf(
+                NamedTask("building c",
+                    listOf(FileKey("/tmp/a"), FileKey("/tmp/b")),
+                    FileKey("/tmp/c"),
+                    {
+                        println("Doing something with a and b to make c")
+                        File("/tmp/c").writeText("Hello")
+                        NullValue()
+                    })
+            )
+        ),
+        FileKey("/tmp/c")
+    )
+}
+
+private fun filebuilder(tasks: Tasks<FileKey, NullValue>, key: FileKey) {
+    val store =
+        BasicStore<FileKey, NullValue, FileModTimeInformation<FileKey>>(FileModTimeInformation())
+    val build = BasicBuild(
+        TopologicalScheduler<FileKey, NullValue, FileModTimeInformation<FileKey>>(),
+        FileModTimeRebuilder(store.info)
+    )
+    val buildTime = measureTimeMillis {
+        build.build(
+            tasks,
+            key,
+            store
+        ) {
+            println(" Doing something to make ${it.output} with the fetcher")
+            NullValue()
+        }
+    }
+    println("Built Topological/ModTime in $buildTime ms")
 }
 
 private fun topological_modtime_build(tasks: Tasks<StringKey, StringValue>) {

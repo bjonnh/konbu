@@ -6,7 +6,10 @@ import net.nprod.konbu.builder.handlers.ImporterHandler
 import net.nprod.konbu.builder.handlers.PreseedHandler
 import net.nprod.konbu.controllers.robot.RobotController
 import mu.KotlinLogging
+import net.nprod.konbu.builder.formal.FileKey
+import net.nprod.konbu.builder.formal.tasks.NullValue
 import net.nprod.konbu.cache.FileCacheManager
+import net.nprod.konbu.controllers.TaskManager
 import timeBlock
 import java.io.File
 
@@ -18,6 +21,9 @@ class BuildScript(
     private val buildParameters: BuildParameters
 ) {
     private val root = buildParameters.root
+
+    private val taskManager: TaskManager = TaskManager()
+
     private val robotController: RobotController = RobotController(buildParameters)
     private val cacheManager = FileCacheManager(File(root, "cache"))
     private val importerHandler: ImporterHandler = ImporterHandler(buildParameters, robotController, cacheManager)
@@ -28,16 +34,21 @@ class BuildScript(
      * Execute the build script
      */
     fun execute() {
-        logger.timeBlock("executing the build script") {
+        logger.timeBlock("constructing the build script") {
             // TODO: Generate catalog file
-            val preseedFile = processPreseed()
-            processImports(preseedFile)
+            processPreseed()
+        }
+
+        logger.timeBlock("running tasks") {
+            taskManager.execute(preseedHandler.preseedFile)
+            processImports(preseedHandler.preseedFile)
             processTargets()
         }
     }
 
-    private fun processPreseed(): File {
-        return preseedHandler.process(imports)
+    private fun processPreseed() {
+        val tasks = preseedHandler.getTasks(imports)
+        taskManager.addAll(tasks)
     }
 
     private fun processImports(preseedFile: File) {
