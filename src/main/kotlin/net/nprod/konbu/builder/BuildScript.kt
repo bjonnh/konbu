@@ -6,6 +6,7 @@ import net.nprod.konbu.builder.handlers.ImporterHandler
 import net.nprod.konbu.builder.handlers.PreseedHandler
 import net.nprod.konbu.controllers.robot.RobotController
 import mu.KotlinLogging
+import net.nprod.konbu.cache.FileCacheManager
 import timeBlock
 import java.io.File
 
@@ -16,8 +17,10 @@ class BuildScript(
     private val imports: Set<Import>,
     private val buildParameters: BuildParameters
 ) {
+    private val root = buildParameters.root
     private val robotController: RobotController = RobotController(buildParameters)
-    private val importerHandler: ImporterHandler = ImporterHandler(buildParameters, robotController)
+    private val cacheManager = FileCacheManager(File(root, "cache"))
+    private val importerHandler: ImporterHandler = ImporterHandler(buildParameters, robotController, cacheManager)
     private val preseedHandler: PreseedHandler = PreseedHandler(buildParameters, robotController)
     private val buildHandler: BuildHandler = BuildHandler(buildParameters, robotController)
 

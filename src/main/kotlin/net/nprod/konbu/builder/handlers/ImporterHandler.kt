@@ -7,6 +7,7 @@ import net.nprod.konbu.controllers.action.action
 import net.nprod.konbu.controllers.robot.RobotController
 import isAlnum
 import mu.KotlinLogging
+import net.nprod.konbu.cache.CacheManager
 import timeBlock
 import java.io.File
 
@@ -36,9 +37,11 @@ data class Import(
  * @param buildParameters: Parameters from the ontology builder TODO: just give it what it needs
  * @param robotController: Controller for ROBOT
  */
-class ImporterHandler(private val buildParameters: BuildParameters, private val robotController: RobotController) {
+class ImporterHandler(
+    private val buildParameters: BuildParameters, private val robotController: RobotController,
+    private val cacheManager: FileCacheManager
+) {
     private val root = buildParameters.root
-    private val cacheManager = FileCacheManager(File(root, "cache"))
 
     /**
      * Import the given Import

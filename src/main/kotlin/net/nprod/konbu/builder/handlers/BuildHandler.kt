@@ -12,7 +12,6 @@ import java.io.File
 
 class BuildHandler(private val buildParameters: BuildParameters, private val robotController: RobotController) {
     private val root = buildParameters.root
-    private val cacheManager = FileCacheManager(File(root, "cache"))
 
     private fun outputFile(target: String, format: String) = File(File(File(root), "output"), "${buildParameters.name}-$target.$format")
 
