@@ -4,21 +4,21 @@ data class ActionResult(
     val status: ActionStatus,
     val message: String? = null
 ) {
-    fun onSkipped(f: () -> Any): ActionResult {
+    fun onSkipped(f: (ActionResult) -> Any): ActionResult {
         if (status == ActionStatus.SKIPPED)
-            f()
+            f(this)
         return this
     }
 
-    fun onFailed(f: () -> Any): ActionResult {
+    fun onFailed(f: (ActionResult) -> Any): ActionResult {
         if (status == ActionStatus.FAILED)
-            f()
+            f(this)
         return this
     }
 
-    fun onExecuted(f: () -> Any): ActionResult {
+    fun onExecuted(f: (ActionResult) -> Any): ActionResult {
         if (status == ActionStatus.EXECUTED)
-            f()
+            f(this)
         return this
     }
 }

@@ -30,15 +30,15 @@ fun action(
     ) {
         try {
             f()
+            ActionResult(
+                ActionStatus.EXECUTED
+            )
         } catch (e: Exception) {
             ActionResult(
                 ActionStatus.FAILED,
                 e.localizedMessage
             )
         }
-        ActionResult(
-            ActionStatus.EXECUTED
-        )
     } else {
         ActionResult(ActionStatus.SKIPPED)
     }
