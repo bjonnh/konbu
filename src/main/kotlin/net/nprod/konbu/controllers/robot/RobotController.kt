@@ -158,7 +158,7 @@ class RobotHandler(private val root: FilePath, catalog: String?, private var sta
         ReduceCommand().execute(
             state,
             arrayOf(
-                "-r", "ELK"
+                "-r", "whelk"
             )
         )
         return this

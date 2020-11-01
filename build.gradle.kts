@@ -26,10 +26,10 @@ dependencies {
     api(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
-    api("org.obolibrary.robot:robot-core:1.7.1") {
+    implementation("org.obolibrary.robot:robot-core:1.7.1") {
         exclude("org.slf4j")
     }
-    api("org.obolibrary.robot:robot-command:1.7.1") {
+    implementation("org.obolibrary.robot:robot-command:1.7.1") {
         exclude("org.slf4j")
     }
 
@@ -52,6 +52,7 @@ tasks {
             exclude(dependency("com.fasterxml.jackson.core:.*"))
             exclude(dependency("org.semanticweb.elk:.*"))
             exclude(dependency("net.sourceforge.owlapi:.*"))
+            exclude(dependency("org.openrdf.sesame:.*"))
         }
         isZip64 = true
         archiveBaseName.set("konbu-shadow")
