@@ -1,17 +1,16 @@
 package net.nprod.konbu.builder
 
+import mu.KotlinLogging
 import net.nprod.konbu.builder.handlers.BuildHandler
 import net.nprod.konbu.builder.handlers.Import
 import net.nprod.konbu.builder.handlers.ImporterHandler
 import net.nprod.konbu.builder.handlers.PreseedHandler
-import net.nprod.konbu.controllers.robot.RobotController
-import mu.KotlinLogging
-import net.nprod.konbu.builder.formal.FileKey
-import net.nprod.konbu.builder.formal.tasks.NullValue
 import net.nprod.konbu.cache.FileCacheManager
 import net.nprod.konbu.controllers.TaskManager
+import net.nprod.konbu.controllers.robot.RobotController
 import timeBlock
 import java.io.File
+
 
 /**
  * A staged ontology building system
@@ -34,35 +33,40 @@ class BuildScript(
      * Execute the build script
      */
     fun execute() {
+        val importFiles = imports.map { import ->
+            importerHandler.getOutFile(import)
+        }
+
         logger.timeBlock("constructing the build script") {
             // TODO: Generate catalog file
             processPreseed()
+            processImports(preseedHandler.preseedFile)
+            processTargets(importFiles)
         }
 
         logger.timeBlock("running tasks") {
-            taskManager.execute(preseedHandler.preseedFile)
-            processImports(preseedHandler.preseedFile)
-            processTargets()
-        }
-    }
-
-    private fun processPreseed() {
-        val tasks = preseedHandler.getTasks(imports)
-        taskManager.addAll(tasks)
-    }
-
-    private fun processImports(preseedFile: File) {
-        logger.timeBlock("processing imports") {
-            imports.forEach {
-                importerHandler.import(it, preseedFile = preseedFile)
+            buildParameters.targets.forEach { (name) -> // target name
+                buildParameters.formats.forEach { format ->
+                    taskManager.execute(buildHandler.outputFile(name, format))
+                }
             }
         }
     }
 
-    private fun processTargets() {
+    private fun processPreseed() {
+        taskManager.addAll(preseedHandler.getTasks(imports))
+    }
+
+    private fun processImports(preseedFile: File) {
+        imports.forEach {
+            taskManager.addAll(importerHandler.getTasks(it, preseedFile = preseedFile))
+        }
+    }
+
+    private fun processTargets(imports: List<File>) {
         logger.timeBlock("processing targets") {
             buildParameters.targets.forEach {
-                buildHandler.build(it)
+                taskManager.addAll(buildHandler.getTasks(it, imports))
             }
         }
     }

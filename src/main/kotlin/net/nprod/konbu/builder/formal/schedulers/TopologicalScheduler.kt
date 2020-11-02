@@ -1,5 +1,6 @@
 package net.nprod.konbu.builder.formal.schedulers
 
+import mu.KotlinLogging
 import net.nprod.konbu.builder.formal.*
 import net.nprod.konbu.builder.formal.graph.reachable
 import net.nprod.konbu.builder.formal.graph.topSort
@@ -15,16 +16,16 @@ class TopologicalScheduler<K : Key, V : Value, I : Information> :
         target: K,
         fetch: (Task<K, V>) -> V
     ): BuildTask<V>? {
-        println("Running the scheduler")
-        println(" We have ${tasks.content.size} tasks")
-        println(" Reachable with that target: ${tasks.reachable(target).size}")
+        logger.info("Running the Topological scheduler")
+        logger.info(" We have ${tasks.content.size} tasks")
+        logger.info(" Tasks reaching that target: ${tasks.reachable(target).size}")
 
         val toBuildOrdered = Tasks(tasks.reachable(target)).topSort()
         // validate inputs
         val outputs = toBuildOrdered.map { it.output }
         toBuildOrdered.forEach {
-            it.input.filter { !outputs.contains(it) }.forEach {
-                if (!it.exists()) throw RuntimeException("Input $it does not exist and doesn't have a rule to make it.")
+            it.input.filter { input -> !outputs.contains(input) }.forEach { existingInput ->
+                if (!existingInput.exists()) throw RuntimeException("Input $existingInput does not exist and doesn't have a rule to make it.")
             }
         }
         val tasks = toBuildOrdered.map {
@@ -37,7 +38,16 @@ class TopologicalScheduler<K : Key, V : Value, I : Information> :
         }
 
         return BuildTask {
-            tasks.last().second()
+            val o = tasks.map {
+                logger.info("Running task ${it.first.name}")
+                it.second()
+            }
+
+            o.last()
         }
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
     }
 }

@@ -10,5 +10,6 @@ open class Task<K : Key, V : Value>(
     open val output: K,
     open val f: (fetch: (K) -> V) -> V
 ) {
+    open val name: String = ""
     fun valid(): Boolean = true
 }

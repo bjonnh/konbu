@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package net.nprod.konbu.builder.formal.graph
 
 import net.nprod.konbu.builder.formal.*

@@ -1,82 +1,90 @@
 package net.nprod.konbu.builder.handlers
 
+import mu.KotlinLogging
 import net.nprod.konbu.builder.BuildParameters
 import net.nprod.konbu.builder.Target
 import net.nprod.konbu.builder.TargetType
-import net.nprod.konbu.cache.FileCacheManager
+import net.nprod.konbu.builder.formal.tasks.NullValue
+import net.nprod.konbu.controllers.OntoTask
 import net.nprod.konbu.controllers.robot.RobotController
-import mu.KotlinLogging
-import timeBlock
+import net.nprod.konbu.controllers.robot.RobotOutputFile
 import java.io.File
 
 
 class BuildHandler(private val buildParameters: BuildParameters, private val robotController: RobotController) {
     private val root = buildParameters.root
+    private val mainSource = File(File(root), buildParameters.mainSource)
 
-    private fun outputFile(target: String, format: String) = File(File(File(root), "output"), "${buildParameters.name}-$target.$format")
+    fun outputFile(target: String, format: String): File =
+        File(File(File(root), "output"), "${buildParameters.name}-$target.$format")
 
-    fun build(target: Target) {
-        logger.timeBlock("  Building ${target.name}") {
-            val out = when (target.targetType) {
-                TargetType.FULL -> {
-                    val merged = robotController.handler()
-                        .merge(File(File(root), buildParameters.mainSource), listOf())
-                    if (target.reasoning) {
-                        merged.reason().relax().reduce()
-                    } else {
-                        merged
-                    }
+    fun getTasks(target: Target, imports: List<File>): List<OntoTask> {
+        val mainOwl = outputFile(target.name, "owl")
+
+        val tasks = mutableListOf(OntoTask(
+            "Building ${target.name} owl",
+            listOf(mainSource) + imports,
+            mainOwl
+        ) {
+            makeOwl(target, mainOwl)
+            NullValue()
+        })
+
+
+        buildParameters.formats.forEach { format ->
+            if (format != "json" && format != "obo") throw RuntimeException("Unhandled format $format")
+            tasks.add(
+                OntoTask(
+                    "Building ${target.name} $format",
+                    listOf(mainOwl),
+                    outputFile(target.name, format)
+                ) {
+                    makeFormat(mainOwl, target, format)
+                    NullValue()
                 }
-                TargetType.BASE -> {
-                    val merged = robotController.handler()
-                        .mergeAndRemoveImports(File(File(root), buildParameters.mainSource), listOf())
-                    if (target.reasoning) {
-                        throw Exception("We are not using reasoning on base")
-                    }
+            )
+        }
+        return tasks
+    }
+
+    // TODO: We need to allow for a two step process and maybe go back to the optimized way when needed?
+    //       We could keep the owl version cached
+    private fun makeFormat(mainOwl: RobotOutputFile, target: Target, format: String) {
+        val tempFile = createTempFile()
+        val owl = robotController.handler().convertFromFile(mainOwl, format, tempFile)
+        outputFile(target.name, format).writeText(
+            tempFile.readLines().filter { line -> !line.startsWith("owl-axioms") }
+                .joinToString("\n")
+        )
+        tempFile.delete()
+    }
+
+    private fun makeOwl(target: Target, mainOwl: RobotOutputFile) {
+        val out = when (target.targetType) {
+            TargetType.FULL -> {
+                val merged = robotController.handler()
+                    .merge(mainSource, listOf())
+                if (target.reasoning) {
+                    merged.reason().relax().reduce()
+                } else {
                     merged
                 }
             }
-            val annotated = out.annotateOntology(
-                iri = buildParameters.uribase,
-                version = "${buildParameters.uribase}/releases/${buildParameters.version}/${buildParameters.name}",
-                versionName = buildParameters.version,
-                outFile = outputFile(target.name, "owl")
-            )
-
-            // Conversions
-            buildParameters.formats.forEach {
-                when (it) {
-                    "json" -> {
-                        logger.timeBlock("Converting to json format") {
-                            val tempFile = createTempFile()
-                            annotated.convert(format = "json", tempFile)
-                            outputFile(target.name, "json").writeText(
-                                tempFile.readLines().filter { line -> !line.startsWith("owl-axioms") }
-                                    .joinToString("\n")
-                            )
-                            tempFile.delete()
-                        }
-                    }
-                    "obo" -> {
-                        logger.timeBlock("Converting to obo format") {
-                            val tempFile = createTempFile()
-                            annotated.convert(format = "obo", tempFile)
-                            outputFile(target.name, "obo").writeText(
-                                tempFile.readLines().filter { line -> !line.startsWith("owl-axioms") }
-                                    .joinToString("\n")
-                            )
-                            tempFile.delete()
-                        }
-                    }
-                    else -> throw Exception("Unhandled format for converting ontology: $it")
+            TargetType.BASE -> {
+                val merged = robotController.handler()
+                    .mergeAndRemoveImports(mainSource, listOf())
+                if (target.reasoning) {
+                    throw Exception("We are not using reasoning on base")
                 }
-
+                merged
             }
-
         }
-    }
 
-    companion object {
-        private val logger = KotlinLogging.logger {}
+        out.annotateOntology(
+            iri = buildParameters.uribase,
+            version = "${buildParameters.uribase}/releases/${buildParameters.version}/${buildParameters.name}",
+            versionName = buildParameters.version,
+            outFile = mainOwl
+        )
     }
 }

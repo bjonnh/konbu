@@ -1,11 +1,12 @@
 package net.nprod.konbu.controllers
 
+import mu.KotlinLogging
 import net.nprod.konbu.builder.formal.FileKey
 import net.nprod.konbu.builder.formal.builders.BasicBuild
 import net.nprod.konbu.builder.formal.information.FileModTimeInformation
 import net.nprod.konbu.builder.formal.rebuilder.FileModTimeRebuilder
 import net.nprod.konbu.builder.formal.schedulers.TopologicalScheduler
-import net.nprod.konbu.builder.formal.stores.BasicStore
+import net.nprod.konbu.builder.formal.stores.BasicFileStore
 import net.nprod.konbu.builder.formal.tasks.NamedTask
 import net.nprod.konbu.builder.formal.tasks.NullValue
 import net.nprod.konbu.builder.formal.tasks.Task
@@ -23,7 +24,7 @@ data class OntoTask(
 
 class TaskManager {
     private val store =
-        BasicStore<FileKey, NullValue, FileModTimeInformation<FileKey>>(FileModTimeInformation())
+        BasicFileStore<FileModTimeInformation<FileKey>>(FileModTimeInformation())
     private val build = BasicBuild(
         TopologicalScheduler<FileKey, NullValue, FileModTimeInformation<FileKey>>(),
         FileModTimeRebuilder(store.info)
@@ -32,33 +33,60 @@ class TaskManager {
     private val content: MutableSet<Task<FileKey, NullValue>> = mutableSetOf()
 
     fun add(name: String, inputs: List<File>, output: File, f: ((FileKey) -> NullValue) -> NullValue) {
+        val inputKeys = inputs.map { FileKey(it) }
         content.add(
             NamedTask(
                 name,
-                inputs.map { FileKey(it) },
+                inputKeys,
                 FileKey(output),
-                f
+                { fetch ->
+                    // Fetch all inputs
+                    f(fetch)
+                }
             )
         )
     }
 
     fun execute(file: File) {
         val tasks = Tasks(content)
+
+        //if (logger.isDebugEnabled) {
+        /**
+         * Show a list of all the tasks
+         */
+        content.forEach {
+            when (it) {
+                is NamedTask -> {
+                    logger.info("  Task: ${it.name}")
+                    logger.info("     I: ${it.input.map { (value) -> value.path }}")
+                    logger.info("     O: ${it.output.value.path}")
+                }
+            }
+        }
+        //}
+
         val buildTime = measureTimeMillis {
             build.build(
                 tasks,
                 FileKey(file),
                 store
             ) {
+                it.f {
+                    NullValue()
+                }
                 NullValue()
             }
         }
-        println("Built ${file.path} in $buildTime ms")
+        logger.info("Built ${file.path} in $buildTime ms")
     }
 
     fun addAll(tasks: Collection<OntoTask>) {
         tasks.forEach {
             add(it.name, it.inputs, it.output, it.f)
         }
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger {}
     }
 }

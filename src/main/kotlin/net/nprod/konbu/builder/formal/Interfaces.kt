@@ -11,28 +11,21 @@ interface Key {
 
 interface Value
 
-inline class StringKey(val value: String) : Key
-
 /**
  * Keys representing files
  */
 data class FileKey(val value: File) : Key {
-    constructor(value: String) : this(
-        File(value)
-    )
-
     /**
      * Get the last modified time as a TimeValue
      */
-    fun lastModified() = TimeValue(value.lastModified())
-    override fun exists() = value.exists()
+    fun lastModified(): TimeValue = TimeValue(value.lastModified())
+    override fun exists(): Boolean = value.exists()
 }
 
-inline class StringValue(val value: String) : Value
 inline class TimeValue(val value: Long)
 inline class BooleanValue(val value: Boolean)
 
-operator fun TimeValue.compareTo(timeValue: TimeValue) = this.value.compareTo(timeValue.value)
+operator fun TimeValue.compareTo(timeValue: TimeValue): Int = this.value.compareTo(timeValue.value)
 
 interface Information
 
@@ -42,16 +35,6 @@ interface Store<K : Key, V : Value, I : Information> {
     fun put(key: K, value: V)
 }
 
-interface Hashable {
-    val key: String
-    val value: String
-}
-
-interface Builder<K : Key, V : Value> {
-    fun fetch(key: K): V
-}
-
-interface Condition
 
 interface Build<K : Key, V : Value, I : Information> {
     fun build(

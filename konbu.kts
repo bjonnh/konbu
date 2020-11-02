@@ -14,7 +14,7 @@ extraSources = listOf()
 
 preseedGeneration = true
 
-formats = listOf("obo", "json")
+formats = listOf("json")
 
 importAndExtract(
     name = "bfo",

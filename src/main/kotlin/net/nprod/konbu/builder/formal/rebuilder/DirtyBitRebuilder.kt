@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package net.nprod.konbu.builder.formal.rebuilder
 
 import net.nprod.konbu.builder.formal.*

@@ -69,6 +69,7 @@ class BuildScriptRecipe {
     /**
      * Add an external ontology
      */
+    @Suppress("unused")
     fun importAndExtract(name: String, location: String, terms: FilePath, forceUpdate: Boolean) {
         imports.add(Import(name, location, File(File(root, termsListsPath), terms), forceUpdate = forceUpdate))
     }
@@ -107,24 +108,23 @@ class BuildScriptRecipe {
         )
     }
 
+    @Suppress("unused")
     fun build_full(name: String, reasoning: Boolean) {
         targets.add(Target(name, reasoning, TargetType.FULL))
     }
 
+    @Suppress("unused")
     fun build_base(name: String, reasoning: Boolean) {
         targets.add(Target(name, reasoning, TargetType.BASE))
     }
 
     // TODO: Triggers
-
-    companion object {
-        private val logger = KotlinLogging.logger {}
-    }
 }
 
 /**
  * Generate a build script using the DSL
  */
+@Suppress("unused")
 fun buildScript(f: BuildScriptRecipe.() -> Unit): BuildScriptRecipe {
     return BuildScriptRecipe().apply(f)
 }
