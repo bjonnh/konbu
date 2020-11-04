@@ -19,9 +19,10 @@ class ImporterHandler(
     private val cacheManager: FileCacheManager
 ) {
     private val root = buildParameters.root
+    private val build = File(root, "build")
 
     init {
-        File(root, "imports").mkdir()
+        File(build, "imports").mkdirs()
     }
 
     fun getTasks(import: Import, preseedFile: File): List<OntoTask> {
@@ -33,7 +34,7 @@ class ImporterHandler(
         return tasks
     }
 
-    internal fun getOutFile(import: Import): File = File(root, "imports/${import.name}_import.owl")
+    internal fun getOutFile(import: Import): File = File(build, "imports/${import.name}_import.owl")
 
     private fun extractTask(
         file: File,

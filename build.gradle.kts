@@ -7,7 +7,6 @@ plugins {
     application
     id("com.github.johnrengelman.shadow") version "6.1.0"
     kotlin("jvm") version "1.4.10"
-
 }
 
 val kotlinVersion: String = "1.4.10"
@@ -79,6 +78,7 @@ tasks {
         dependsOn(shadowJar)
     }
 }
+
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     freeCompilerArgs = listOf("-Xinline-classes")

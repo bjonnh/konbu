@@ -1,0 +1,12 @@
+ID	Label	Type	subclass_of	equivalent_to
+ID	A rdfs:label	TYPE	SC %	SC realizes some %
+PHO:0000218	implantation	class	administering substance in vivo	material to be added role
+PHO:0000219	bite	class	administering substance in vivo	material to be added role
+PHO:0000220	infusion	class	administering substance in vivo	material to be added role
+PHO:0000221	intubation	class	administering substance in vivo	material to be added role
+PHO:0000222	unction	class	administering substance in vivo	material to be added role
+PHO:0000223	bolus	class	administering substance in vivo	material to be added role
+PHO:0000224	iontophoresis	class	administering substance in vivo	material to be added role
+PHO:0000225	nasogastric	class	administering substance in vivo	material to be added role
+PHO:0000226	patch	class	administering substance in vivo	material to be added role
+PHO:0000227	inhalation	class	administering substance in vivo	material to be added role

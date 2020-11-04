@@ -15,15 +15,18 @@ import java.io.File
  */
 class PreseedHandler(private val buildParameters: BuildParameters, private val robotController: RobotController) {
     private val root = buildParameters.root
+    private val build = File(root, "build")
+    private val preseed = File(build, "preseed")
+
+    init {
+        preseed.mkdirs()
+    }
 
     /**
      * location of the preseed file
      */
-    val preseedFile: File = File(File(root, "tmp"), "pre_seed.txt")
+    val preseedFile: File = File(preseed, "pre_seed.txt")
 
-    init {
-        File(root, "tmp").mkdir()
-    }
 
     fun getTasks(imports: Set<Import>): List<OntoTask> {
         // TODO: add force update
@@ -31,9 +34,9 @@ class PreseedHandler(private val buildParameters: BuildParameters, private val r
 
         val mainSource = File(root, buildParameters.mainSource)
         val extraFiles = buildParameters.extraSources.map { File(root, it) }
-        val mergedFile = File(File(root, "tmp"), "merged-no-imports.owl")
+        val mergedFile = File(preseed, "merged-no-imports.owl")
 
-        if (imports.any { !File(root, "imports/${it.name}_import.owl").exists() }) {
+        if (imports.any { !File(build, "imports/${it.name}_import.owl").exists() }) {
             logger.warn("Skipping preseed generation as all imports have not been processed")
             // We create an empty file if it doesn't exist
             if (!preseedFile.exists()) preseedFile.writeText("")

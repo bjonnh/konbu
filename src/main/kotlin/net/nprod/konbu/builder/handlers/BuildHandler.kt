@@ -1,6 +1,5 @@
 package net.nprod.konbu.builder.handlers
 
-import mu.KotlinLogging
 import net.nprod.konbu.builder.BuildParameters
 import net.nprod.konbu.builder.Target
 import net.nprod.konbu.builder.TargetType
@@ -18,12 +17,12 @@ class BuildHandler(private val buildParameters: BuildParameters, private val rob
     fun outputFile(target: String, format: String): File =
         File(File(File(root), "output"), "${buildParameters.name}-$target.$format")
 
-    fun getTasks(target: Target, imports: List<File>): List<OntoTask> {
+    fun getTasks(target: Target, dependencies: List<File>): List<OntoTask> {
         val mainOwl = outputFile(target.name, "owl")
 
         val tasks = mutableListOf(OntoTask(
             "Building ${target.name} owl",
-            listOf(mainSource) + imports,
+            listOf(mainSource) + dependencies,
             mainOwl
         ) {
             makeOwl(target, mainOwl)

@@ -1,5 +1,7 @@
 package net.nprod.konbu.builder
 
+import net.nprod.konbu.builder.handlers.Import
+
 /**
  * Parameters used to build the ontology
  *
@@ -11,6 +13,7 @@ package net.nprod.konbu.builder
  * @param mainSource: main source file (relative to root)
  * @param extraSources: extra source files (relative to root)
  * @param preseedGeneration: does a preseed has to be generated
+ * @param modules: the list of modules to be built into the ontology (tsv files)
  * @param targets: the targets that will have to be built
  * @param formats: the formats of the ontology to be built
  */
@@ -22,8 +25,11 @@ data class BuildParameters(
     val version: String,
     val catalog: String?,
     val mainSource: String,
-    val extraSources: List<String>,
+    val extraSources: Set<String>,
     val preseedGeneration: Boolean,
-    val targets: List<Target>,
-    val formats: List<String>
+    val prefixes: Set<Prefix>,
+    val imports: Set<Import>,
+    val modules: Set<OntoModule>,
+    val targets: Set<Target>,
+    val formats: Set<String>
 )

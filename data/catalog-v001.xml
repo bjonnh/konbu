@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
     <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho.owl" uri="data/main-edit.owl"/>
-    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/bfo_import.owl" uri="imports/bfo_import.owl"/>
-    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/ro_import.owl" uri="imports/ro_import.owl"/>
-    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/eco_import.owl" uri="imports/eco_import.owl"/>
+    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/bfo_import.owl" uri="build/imports/bfo_import.owl"/>
+    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/ro_import.owl" uri="build/imports/ro_import.owl"/>
+    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/eco_import.owl" uri="build/imports/eco_import.owl"/>
+    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/obi_import.owl" uri="build/imports/obi_import.owl"/>
+    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/modules/administration-methods.owl" uri="build/modules/administration-methods.owl"/>
     <group id="Folder Repository, directory=, recursive=false, Auto-Update=false, version=2" prefer="public" xml:base=""/>
 </catalog>

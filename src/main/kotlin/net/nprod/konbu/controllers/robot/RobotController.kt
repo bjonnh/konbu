@@ -3,6 +3,7 @@ package net.nprod.konbu.controllers.robot
 import FilePath
 import SparqlFile
 import net.nprod.konbu.builder.BuildParameters
+import net.nprod.konbu.builder.Prefix
 import org.apache.log4j.Logger
 import org.apache.log4j.spi.LoggerFactory
 import org.obolibrary.robot.*
@@ -194,32 +195,44 @@ class RobotHandler(private val root: FilePath, catalog: String?, private var sta
      */
     fun annotateOntology(
         iri: String,
-        version: String,
-        versionName: String,
+        version: String? = null,
+        versionName: String? = null,
         outFile: RobotOutputFile? = null
     ): RobotHandler {
+        require((version == null && versionName == null) || (version != null && versionName != null)) {
+            "You have to specify a version and versionName or none of them"
+        }
         preserveRootLogger {
-            AnnotateCommand().execute(
+            val out = AnnotateCommand().execute(
                 state,
                 arrayOf(
-                    "--ontology-iri", iri
-                )
+                    "--ontology-iri", iri,  // Now if we have no versions, we output now
+                ) + if (version == null && versionName == null) {
+                    arrayOf(*outFile.argArray())
+                } else {
+                    arrayOf()
+                }
             )
+            if (version != null) {
+                AnnotateCommand().execute(
+                    state,
+                    arrayOf(
+                        "-V", version
+                    )
+                )
+            }
 
-            AnnotateCommand().execute(
-                state,
-                arrayOf(
-                    "-V", version
+            if (versionName != null) {
+                AnnotateCommand().execute(
+                    state,
+                    arrayOf(
+                        "--annotation", "owl:versionInfo", versionName,
+                        *outFile.argArray()
+                    )
                 )
-            )
-
-            AnnotateCommand().execute(
-                state,
-                arrayOf(
-                    "--annotation", "owl:versionInfo", versionName,
-                    *outFile.argArray()
-                )
-            )
+            } else {
+                out
+            }
         }
         return this
     }
@@ -252,6 +265,34 @@ class RobotHandler(private val root: FilePath, catalog: String?, private var sta
                     "-c", "false",
                     "-f", format,
                     "-o", outFile.path
+                )
+            )
+        }
+        return this
+    }
+
+    /**
+     * Build a module from the ontology using a TSV template
+     */
+    fun template(input: File, template: File, prefixes: Set<Prefix>): RobotHandler {
+        val prefixesOptions = prefixes.flatMap {
+            listOf("--prefix", "\"${it.prefix}: ${it.uri}\"")
+        }.toTypedArray()
+        println("Prefixes: $prefixes")
+        println(
+            arrayOf(
+                *prefixesOptions,
+                "--input", input.path,
+                "--template", template.path
+            ).toList()
+        )
+        preserveRootLogger {
+            TemplateCommand().execute(
+                state,
+                arrayOf(
+                    "--input", input.path,
+                    "--template", template.path,
+                    *prefixesOptions
                 )
             )
         }

@@ -2,9 +2,10 @@ package net.nprod.konbu.builder
 
 import FilePath
 import net.nprod.konbu.builder.handlers.Import
-import mu.KotlinLogging
 import java.io.File
 import kotlin.script.experimental.annotations.KotlinScript
+
+typealias OntoModule = String
 
 /**
  * Generate a BuildScript using a DSL
@@ -30,7 +31,7 @@ class BuildScriptRecipe {
     /**
      * extra source files for the ontology (relative to root)
      */
-    var extraSources: List<String> = listOf()
+    var extraSources: Set<String> = setOf()
 
     /**
      * do we need to generate a preseed
@@ -42,7 +43,6 @@ class BuildScriptRecipe {
      */
     var catalog: String? = null
 
-    private val imports: MutableSet<Import> = mutableSetOf()
 
     /**
      * location of the terms files (relative to root)
@@ -62,9 +62,20 @@ class BuildScriptRecipe {
     /**
      * formats the ontology will be built to besides owl
      */
-    var formats: List<String> = listOf()
+    var formats: Set<String> = setOf()
 
-    private val targets: MutableList<Target> = mutableListOf()
+    private val imports: MutableSet<Import> = mutableSetOf()
+    private val targets: MutableSet<Target> = mutableSetOf()
+    private val modules: MutableSet<OntoModule> = mutableSetOf()
+    private val prefixes: MutableSet<Prefix> = mutableSetOf()
+
+    /**
+     * Add a prefix
+     */
+    @Suppress("unused")
+    fun prefix(prefix: String, uri: String) {
+        prefixes.add(Prefix(prefix, uri))
+    }
 
     /**
      * Add an external ontology
@@ -77,8 +88,27 @@ class BuildScriptRecipe {
     /**
      * Import an external ontology
      */
+    @Suppress("unused")
     fun import(name: String, location: String, forceUpdate: Boolean) {
         imports.add(Import(name, location, forceUpdate = forceUpdate))
+    }
+
+    /**
+     * Add a new module built using a robot template
+     */
+    @Suppress("unused")
+    fun module(file: String) {
+        modules.add(file)
+    }
+
+    @Suppress("unused")
+    fun buildFull(name: String, reasoning: Boolean) {
+        targets.add(Target(name, reasoning, TargetType.FULL))
+    }
+
+    @Suppress("unused")
+    fun buildBase(name: String, reasoning: Boolean) {
+        targets.add(Target(name, reasoning, TargetType.BASE))
     }
 
     /**
@@ -92,7 +122,6 @@ class BuildScriptRecipe {
 
         require(File(root).exists()) { "Root directory $root must exist." }
         return BuildScript(
-            imports = imports.toSet(),
             buildParameters = BuildParameters(
                 root = root,
                 name = name,
@@ -102,40 +131,22 @@ class BuildScriptRecipe {
                 mainSource = mainSource,
                 extraSources = extraSources,
                 preseedGeneration = preseedGeneration,
+                prefixes = prefixes,
+                imports = imports,
+                modules = modules,
                 targets = targets,
                 formats = formats
             )
         )
     }
 
-    @Suppress("unused")
-    fun build_full(name: String, reasoning: Boolean) {
-        targets.add(Target(name, reasoning, TargetType.FULL))
+    companion object {
+        /**
+         * Generate a build script using the DSL
+         */
+        @Suppress("unused")
+        fun buildScript(f: BuildScriptRecipe.() -> Unit): BuildScriptRecipe {
+            return BuildScriptRecipe().apply(f)
+        }
     }
-
-    @Suppress("unused")
-    fun build_base(name: String, reasoning: Boolean) {
-        targets.add(Target(name, reasoning, TargetType.BASE))
-    }
-
-    // TODO: Triggers
 }
-
-/**
- * Generate a build script using the DSL
- */
-@Suppress("unused")
-fun buildScript(f: BuildScriptRecipe.() -> Unit): BuildScriptRecipe {
-    return BuildScriptRecipe().apply(f)
-}
-
-enum class TargetType {
-    FULL,
-    BASE
-}
-
-data class Target(
-    val name: String,
-    val reasoning: Boolean,
-    val targetType: TargetType
-)

@@ -32,16 +32,20 @@ class TaskManager {
 
     private val content: MutableSet<Task<FileKey, NullValue>> = mutableSetOf()
 
-    fun add(name: String, inputs: List<File>, output: File, f: ((FileKey) -> NullValue) -> NullValue) {
-        val inputKeys = inputs.map { FileKey(it) }
+    /**
+     * Add a single OntoTask to the manager
+     */
+    fun add(task: OntoTask) {
+        // it.name, it.inputs, it.output, it.f
+        val inputKeys = task.inputs.map { FileKey(it) }
         content.add(
             NamedTask(
-                name,
+                task.name,
                 inputKeys,
-                FileKey(output),
+                FileKey(task.output),
                 { fetch ->
                     // Fetch all inputs
-                    f(fetch)
+                    task.f(fetch)
                 }
             )
         )
@@ -82,7 +86,7 @@ class TaskManager {
 
     fun addAll(tasks: Collection<OntoTask>) {
         tasks.forEach {
-            add(it.name, it.inputs, it.output, it.f)
+            add(it)
         }
     }
 

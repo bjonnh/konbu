@@ -10,11 +10,14 @@ catalog = "catalog-v001.xml" // This is the default in robot anyway
 termsListsPath = "terms" // Path of term lists
 
 mainSource = "main-edit.owl"
-extraSources = listOf()
+extraSources = setOf()
 
 preseedGeneration = true
 
-formats = listOf("json")
+formats = setOf("json")
+
+prefix("PHO", uribase)
+prefix("OBI", "http://purl.obolibrary.org/obo/OBI_")
 
 importAndExtract(
     name = "bfo",
@@ -37,5 +40,15 @@ importAndExtract(
     forceUpdate = forceUpdate
 )
 
-build_full(name = "full", reasoning = true)
-build_base(name = "base", reasoning = false)
+importAndExtract(
+    name = "obi",
+    location = "http://purl.obolibrary.org/obo/obi.owl",
+    terms = "obi_terms.txt",
+    forceUpdate = forceUpdate
+)
+
+
+module(file = "administration-methods.tsv")
+
+buildFull(name = "full", reasoning = true)
+buildBase(name = "base", reasoning = false)
