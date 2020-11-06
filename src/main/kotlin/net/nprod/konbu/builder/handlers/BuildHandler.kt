@@ -17,15 +17,15 @@ class BuildHandler(private val buildParameters: BuildParameters, private val rob
     fun outputFile(target: String, format: String): File =
         File(File(File(root), "output"), "${buildParameters.name}-$target.$format")
 
-    fun getTasks(target: Target, dependencies: List<File>): List<OntoTask> {
+    fun getTasks(target: Target, importFiles: List<File>, moduleFiles: List<File>): List<OntoTask> {
         val mainOwl = outputFile(target.name, "owl")
 
         val tasks = mutableListOf(OntoTask(
             "Building ${target.name} owl",
-            listOf(mainSource) + dependencies,
+            listOf(mainSource) + importFiles + moduleFiles,
             mainOwl
         ) {
-            makeOwl(target, mainOwl)
+            makeOwl(target, mainOwl, moduleFiles)
             NullValue()
         })
 
@@ -58,11 +58,11 @@ class BuildHandler(private val buildParameters: BuildParameters, private val rob
         tempFile.delete()
     }
 
-    private fun makeOwl(target: Target, mainOwl: RobotOutputFile) {
+    private fun makeOwl(target: Target, mainOwl: RobotOutputFile, moduleFiles: List<File>) {
         val out = when (target.targetType) {
             TargetType.FULL -> {
                 val merged = robotController.handler()
-                    .merge(mainSource, listOf())
+                    .merge(mainSource, moduleFiles)
                 if (target.reasoning) {
                     merged.reason().relax().reduce()
                 } else {

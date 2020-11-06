@@ -5,6 +5,5 @@
     <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/ro_import.owl" uri="build/imports/ro_import.owl"/>
     <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/eco_import.owl" uri="build/imports/eco_import.owl"/>
     <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/imports/obi_import.owl" uri="build/imports/obi_import.owl"/>
-    <uri id="User Entered Import Resolution" name="http://purl.obolibrary.org/obo/pho/modules/administration-methods.owl" uri="build/modules/administration-methods.owl"/>
     <group id="Folder Repository, directory=, recursive=false, Auto-Update=false, version=2" prefer="public" xml:base=""/>
 </catalog>

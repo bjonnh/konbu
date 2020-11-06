@@ -43,7 +43,7 @@ class BuildScript(
             processPreseed()
             processImports(preseedHandler.preseedFile)
             processModules(importFiles)
-            processTargets(importFiles + moduleFiles)
+            processTargets(importFiles,  moduleFiles)
         }
 
         logger.timeBlock("running tasks") {
@@ -73,10 +73,10 @@ class BuildScript(
         }
     }
 
-    private fun processTargets(dependencies: List<File>) {
+    private fun processTargets(importFiles: List<File>, moduleFiles: List<File>) {
         logger.timeBlock("processing targets") {
             buildParameters.targets.forEach {
-                taskManager.addAll(buildHandler.getTasks(it, dependencies))
+                taskManager.addAll(buildHandler.getTasks(it, importFiles, moduleFiles))
             }
         }
     }
