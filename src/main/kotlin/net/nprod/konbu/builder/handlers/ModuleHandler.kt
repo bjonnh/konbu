@@ -27,17 +27,25 @@ class ModuleHandler(
     }
 
     fun getTasks(module: OntoModule, dependencies: List<File>): OntoTask {
-        val inFile = File(modulesSource, module)
+        val inFile = File(modulesSource, module.name)
+        val requirements = module.require.map { getOutFile(OntoModule(it, listOf())) }
+        val totalDependencies =
+            listOf(inFile) + dependencies + requirements // Dependencies but also the requirements of that module
+        println("Total dependencies= $totalDependencies")
+        println("Out file: ${getOutFile(module)}")
+        println("Main Source: ${mainSource}")
         return OntoTask(
-            "Creating module $module",
-            listOf(inFile) + dependencies,
+            "Creating module ${module.name}",
+            totalDependencies,
             getOutFile(module)
         ) {
-            robotController.handler().template(
+            robotController.handler().merge(
                 input = mainSource,
+                extraInput = requirements,
+            ).template(
                 template = inFile,
                 prefixes = buildParameters.prefixes
-            ).annotateOntology("${buildParameters.uribase}/modules/$module.owl", outFile = getOutFile(module))
+            ).annotateOntology("${buildParameters.uribase}/modules/${module.name}.owl", outFile = getOutFile(module))
             NullValue()
         }
     }
@@ -45,5 +53,5 @@ class ModuleHandler(
     /**
      * Get the output file of the task
      */
-    fun getOutFile(module: OntoModule) = File(modulesOut, "${module.split(".")[0]}.owl")
+    fun getOutFile(module: OntoModule): File = File(modulesOut, "${module.name.split(".")[0]}.owl")
 }

@@ -48,7 +48,8 @@ importAndExtract(
 )
 
 
-module(file = "administration-methods.tsv")
+module("administration-methods.tsv")
+module("route-of-administration.tsv", require=listOf("administration-methods.tsv"))
 
 buildFull(name = "full", reasoning = true)
 buildBase(name = "base", reasoning = false)

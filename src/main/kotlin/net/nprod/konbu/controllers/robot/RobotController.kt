@@ -94,16 +94,17 @@ class RobotHandler(private val root: FilePath, catalog: String?, private var sta
         outFile: RobotOutputFile? = null
     ): RobotHandler {
         preserveRootLogger {
+            val args=arrayOf(
+                *catalogArray,
+                "-i", input.path,
+                *extraInput.flatMap {
+                    listOf("-i", it.path)
+                }.toTypedArray(),
+                *outFile.argArray()
+            )
             MergeCommand().execute(
                 state,
-                arrayOf(
-                    *catalogArray,
-                    "-i", input.path,
-                    *extraInput.flatMap {
-                        listOf("-i", it.path)
-                    }.toTypedArray(),
-                    *outFile.argArray()
-                )
+                args
             )
         }
         return this
@@ -274,26 +275,25 @@ class RobotHandler(private val root: FilePath, catalog: String?, private var sta
     /**
      * Build a module from the ontology using a TSV template
      */
-    fun template(input: File, template: File, prefixes: Set<Prefix>): RobotHandler {
+    fun template(template: File, prefixes: Set<Prefix>): RobotHandler {
         val prefixesOptions = prefixes.flatMap {
             listOf("--prefix", "\"${it.prefix}: ${it.uri}\"")
         }.toTypedArray()
-        println("Prefixes: $prefixes")
-        println(
-            arrayOf(
-                *prefixesOptions,
-                "--input", input.path,
-                "--template", template.path
-            ).toList()
+        val args = arrayOf(
+            "-vvv",
+            *prefixesOptions,
+            /*"--input", input.path,
+            *extraInput.flatMap {
+                listOf("-i", it.path)
+            }.toTypedArray(),*/
+            "--template", template.path
         )
+
+        println(args.map { it.toString() })
         preserveRootLogger {
             TemplateCommand().execute(
                 state,
-                arrayOf(
-                    "--input", input.path,
-                    "--template", template.path,
-                    *prefixesOptions
-                )
+                args
             )
         }
         return this

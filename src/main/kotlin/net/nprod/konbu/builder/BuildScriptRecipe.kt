@@ -5,7 +5,10 @@ import net.nprod.konbu.builder.handlers.Import
 import java.io.File
 import kotlin.script.experimental.annotations.KotlinScript
 
-typealias OntoModule = String
+data class OntoModule(
+    val name: String,
+    val require: List<String>
+)
 
 /**
  * Generate a BuildScript using a DSL
@@ -97,8 +100,8 @@ class BuildScriptRecipe {
      * Add a new module built using a robot template
      */
     @Suppress("unused")
-    fun module(file: String) {
-        modules.add(file)
+    fun module(file: String, require: List<String> = listOf()) {
+        modules.add(OntoModule(file, require))
     }
 
     @Suppress("unused")

@@ -27,8 +27,7 @@ import java.io.File
 // TODO: keep the build graph from run to run
 // TODO: consider separate compilation ala bazel
 //      «When Bazel performs separate compilation, it creates a new directory and fills it with symlinks to the explicit input dependencies for the rule.»
-// TODO: There is a bug when really bootstraping an ontology, for which we don't have the initial module… We may want to
-//       create an empty file maybe?
+// TODO: Allow to disable preseed, it doesn't seem to help anyway
 
 /**
  * Run the specified action on the build script

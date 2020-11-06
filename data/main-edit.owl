@@ -42,6 +42,10 @@
     <owl:Class rdf:about="http://purl.obolibrary.org/obo/PHO_00000000">
         <rdfs:label xml:lang="en">root node</rdfs:label>
     </owl:Class>
+
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/PHO_00000001">
+        <rdfs:label xml:lang="en">has application target location</rdfs:label>
+    </owl:Class>
 </rdf:RDF>
 
 

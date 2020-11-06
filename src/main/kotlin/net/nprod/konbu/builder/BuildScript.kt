@@ -22,7 +22,8 @@ class BuildScript(
 
     private val robotController: RobotController = RobotController(buildParameters)
     private val cacheManager = FileCacheManager(File(root, "cache"))
-    private val importerHandler: ImporterHandler = ImporterHandler(buildParameters, robotController, cacheManager, build)
+    private val importerHandler: ImporterHandler =
+        ImporterHandler(buildParameters, robotController, cacheManager, build)
     private val preseedHandler: PreseedHandler = PreseedHandler(buildParameters, robotController, build)
     private val moduleHandler: ModuleHandler = ModuleHandler(buildParameters, robotController, build)
     private val buildHandler: BuildHandler = BuildHandler(buildParameters, robotController)
@@ -55,7 +56,7 @@ class BuildScript(
             processPreseed()
             processImports(preseedHandler.preseedFile)
             processModules(importFiles)
-            processTargets(importFiles,  moduleFiles)
+            processTargets(importFiles, moduleFiles)
         }
 
         logger.timeBlock("running tasks") {
