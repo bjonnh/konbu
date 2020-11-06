@@ -46,6 +46,8 @@ dependencies {
     api("org.jetbrains.kotlin:kotlin-scripting-jvm:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host:$kotlinVersion")
 
+    implementation("com.github.ajalt.clikt:clikt:3.0.1")
+
     api("io.github.microutils:kotlin-logging:1.12.0")
     api("org.slf4j:slf4j-log4j12:1.7.29")
     testImplementation("junit", "junit", "4.12")
@@ -63,6 +65,8 @@ tasks {
             exclude(dependency("org.semanticweb.elk:.*"))
             exclude(dependency("net.sourceforge.owlapi:.*"))
             exclude(dependency("org.openrdf.sesame:.*"))
+            exclude(dependency("org.apache.jena:.*"))
+            exclude(dependency("com.jcabi:.*"))
         }
         isZip64 = true
         archiveBaseName.set("konbu-shadow")
@@ -82,4 +86,5 @@ tasks {
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     freeCompilerArgs = listOf("-Xinline-classes")
+    languageVersion = "1.4"
 }

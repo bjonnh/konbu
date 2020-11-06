@@ -13,9 +13,19 @@ import java.io.File
 class BuildHandler(private val buildParameters: BuildParameters, private val robotController: RobotController) {
     private val root = buildParameters.root
     private val mainSource = File(File(root), buildParameters.mainSource)
+    private val outputDir = File(File(root), "output")
+
+    init {
+        outputDir.mkdirs()
+    }
+
+    fun clean() {
+        outputDir.deleteRecursively()
+        outputDir.mkdirs()
+    }
 
     fun outputFile(target: String, format: String): File =
-        File(File(File(root), "output"), "${buildParameters.name}-$target.$format")
+        File(outputDir, "${buildParameters.name}-$target.$format")
 
     fun getTasks(target: Target, importFiles: List<File>, moduleFiles: List<File>): List<OntoTask> {
         val mainOwl = outputFile(target.name, "owl")

@@ -1,5 +1,15 @@
 package net.nprod.konbu
 
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.subcommands
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.prompt
+import com.github.ajalt.clikt.parameters.types.file
+import com.github.ajalt.clikt.parameters.types.int
+import net.nprod.konbu.builder.BuildScript
 import net.nprod.konbu.builder.BuildScriptRecipe
 import runScript
 import java.io.File
@@ -20,14 +30,42 @@ import java.io.File
 // TODO: There is a bug when really bootstraping an ontology, for which we don't have the initial module… We may want to
 //       create an empty file maybe?
 
-fun main() {
+/**
+ * Run the specified action on the build script
+ */
+fun runAction(action: (BuildScript) -> Unit) {
     val file = File("konbu.kts")
     if (!file.exists()) throw RuntimeException("You need a ${file.name} file for this tool to work.")
-    val recipe = BuildScriptRecipe()
+    val recipe: BuildScriptRecipe = BuildScriptRecipe()
     runScript(file, receivers = arrayOf(recipe)) {
-        recipe.build().execute()
+        recipe.build().apply(action)
     }
 }
+
+class Compiler : CliktCommand(allowMultipleSubcommands = true) {
+    override fun run() {
+        echo("Running konbu! ~~~")
+    }
+}
+
+class Clean : CliktCommand() {
+    val force by option().flag()
+    override fun run() {
+        runAction {
+            it.clean()
+        }
+    }
+}
+
+class Build : CliktCommand() {
+    override fun run() {
+        runAction {
+            it.execute()
+        }
+    }
+}
+
+fun main(args: Array<String>) = Compiler().subcommands(Clean(), Build()).main(args)
 
 /**
 all:

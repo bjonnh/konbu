@@ -16,15 +16,27 @@ class BuildScript(
     private val buildParameters: BuildParameters
 ) {
     private val root = buildParameters.root
+    private val build = File(root, "build")
 
     private val taskManager: TaskManager = TaskManager()
 
     private val robotController: RobotController = RobotController(buildParameters)
     private val cacheManager = FileCacheManager(File(root, "cache"))
-    private val importerHandler: ImporterHandler = ImporterHandler(buildParameters, robotController, cacheManager)
-    private val preseedHandler: PreseedHandler = PreseedHandler(buildParameters, robotController)
-    private val moduleHandler: ModuleHandler = ModuleHandler(buildParameters, robotController)
+    private val importerHandler: ImporterHandler = ImporterHandler(buildParameters, robotController, cacheManager, build)
+    private val preseedHandler: PreseedHandler = PreseedHandler(buildParameters, robotController, build)
+    private val moduleHandler: ModuleHandler = ModuleHandler(buildParameters, robotController, build)
     private val buildHandler: BuildHandler = BuildHandler(buildParameters, robotController)
+
+    /**
+     * Clean up
+     */
+    fun clean() {
+        cacheManager.clean()
+        importerHandler.clean()
+        moduleHandler.clean()
+        buildHandler.clean()
+        preseedHandler.clean()
+    }
 
     /**
      * Execute the build script

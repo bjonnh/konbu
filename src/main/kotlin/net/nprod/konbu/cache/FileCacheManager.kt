@@ -14,6 +14,14 @@ class FileCacheManager(private val cacheLocation: File) : CacheManager<File> {
     }
 
     /**
+     * Clean the cache
+     */
+    override fun clean() {
+        cacheLocation.deleteRecursively()
+        cacheLocation.mkdirs()
+    }
+
+    /**
      * Get the File for an entry, but doesn't check if it exists
      */
     fun getEntryFile(entry: String): File {

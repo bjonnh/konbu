@@ -5,4 +5,5 @@ interface CacheManager<T> {
     fun getEntry(entry: String): T
     fun getEntryOrNull(entry: String): T?
     fun delete(entry: String): Boolean
+    fun clean()
 }

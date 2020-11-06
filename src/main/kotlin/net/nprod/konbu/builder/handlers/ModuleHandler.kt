@@ -7,14 +7,22 @@ import net.nprod.konbu.controllers.OntoTask
 import net.nprod.konbu.controllers.robot.RobotController
 import java.io.File
 
-class ModuleHandler(private val buildParameters: BuildParameters, private val robotController: RobotController) {
+class ModuleHandler(
+    private val buildParameters: BuildParameters,
+    private val robotController: RobotController,
+    private val build: File
+) {
     private val root = buildParameters.root
-    private val build = File(root, "build")
     private val modulesSource = File(root, "modules")
     private val modulesOut = File(build, "modules")
     private val mainSource = File(File(root), buildParameters.mainSource)
 
     init {
+        modulesOut.mkdirs()
+    }
+
+    fun clean() {
+        modulesOut.deleteRecursively()
         modulesOut.mkdirs()
     }
 

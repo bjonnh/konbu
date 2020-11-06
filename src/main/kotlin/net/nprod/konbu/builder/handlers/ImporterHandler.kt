@@ -16,13 +16,19 @@ import java.io.File
  */
 class ImporterHandler(
     private val buildParameters: BuildParameters, private val robotController: RobotController,
-    private val cacheManager: FileCacheManager
+    private val cacheManager: FileCacheManager,
+    private val build: File
 ) {
     private val root = buildParameters.root
-    private val build = File(root, "build")
+    private val importsDir = File(build, "imports")
 
     init {
-        File(build, "imports").mkdirs()
+        importsDir.mkdirs()
+    }
+
+    fun clean() {
+        importsDir.deleteRecursively()
+        importsDir.mkdirs()
     }
 
     fun getTasks(import: Import, preseedFile: File): List<OntoTask> {
@@ -34,7 +40,7 @@ class ImporterHandler(
         return tasks
     }
 
-    internal fun getOutFile(import: Import): File = File(build, "imports/${import.name}_import.owl")
+    internal fun getOutFile(import: Import): File = File(importsDir, "${import.name}_import.owl")
 
     private fun extractTask(
         file: File,

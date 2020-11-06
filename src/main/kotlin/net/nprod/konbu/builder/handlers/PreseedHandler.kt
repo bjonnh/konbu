@@ -13,12 +13,20 @@ import java.io.File
  * @param buildParameters: The build parameters from the ontology (needs root, and sources)
  * @param robotController: The ROBOT controller
  */
-class PreseedHandler(private val buildParameters: BuildParameters, private val robotController: RobotController) {
+class PreseedHandler(
+    private val buildParameters: BuildParameters,
+    private val robotController: RobotController,
+    private val build: File
+) {
     private val root = buildParameters.root
-    private val build = File(root, "build")
     private val preseed = File(build, "preseed")
 
     init {
+        preseed.mkdirs()
+    }
+
+    fun clean() {
+        preseed.deleteRecursively()
         preseed.mkdirs()
     }
 
